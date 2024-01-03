@@ -1,7 +1,8 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
-
-namespace API.Controllers;
+using Microsoft.Extensions.Logging;
+using API;
 
 [ApiController]
 [Route("[controller]")]
@@ -15,17 +16,21 @@ public class FolderController : ControllerBase
     }
 
     [HttpPost(Name = "GetFolder")]
-    public IEnumerable<Folder> Post()
+    public IEnumerable<Folder> Post([FromBody] FolderRequestModel model)
     {
         var folders = new List<Folder>();
 
-        var path  = Request.Form["path"];
+        string path = model.Path;
+        // var body  = Request.Body.ToString();
+        // log the request
+        // _logger.LogInformation(body);
+        // var path = body.Split(":")[1];
 
         var folder = new Folder
         {
             Name = path,
             Path = path,
-            Folders = Directory.GetDirectories(path),
+            FolderNames = Directory.GetDirectories(path),
             Files = Directory.GetFiles(path)
         };
         folders.Add(folder);
@@ -52,6 +57,11 @@ public class FolderController : ControllerBase
         //     });
         // }
         return folders;
+    }
+
+     public class FolderRequestModel
+    {
+        public string Path { get; set; }
     }
 
 }
