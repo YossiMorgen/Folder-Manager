@@ -20,42 +20,29 @@ public class FolderController : ControllerBase
     {
         var folders = new List<Folder>();
 
-        string path = model.Path;
-        // var body  = Request.Body.ToString();
-        // log the request
-        // _logger.LogInformation(body);
-        // var path = body.Split(":")[1];
+        string path = model?.Path ?? "C://";
 
         var folder = new Folder
         {
             Name = path,
             Path = path,
-            FolderNames = Directory.GetDirectories(path),
-            Files = Directory.GetFiles(path)
+            FolderNames = Directory.GetDirectories(path).Where(folder => !IsHiddenFolder(folder)).ToArray() ,
+            Files = Directory.GetFiles(path).Where(file => !IsHiddenFile(file)).ToArray()
         };
+
+        bool IsHiddenFolder(string folderPath)
+        {
+            var info = new DirectoryInfo(folderPath);
+            return info.Attributes.HasFlag(FileAttributes.Hidden);
+        }
+
+        bool IsHiddenFile(string filePath)
+        {
+            var info = new FileInfo(filePath);
+            return info.Attributes.HasFlag(FileAttributes.Hidden);
+        }
+
         folders.Add(folder);
-        // var files = Directory.GetFiles(path);
-        // foreach (var file in files)
-        // {
-        //     var fileInfo = new FileInfo(file);
-        //     folder.Files.Add(new File
-        //     {
-        //         Name = fileInfo.Name,
-        //         Path = fileInfo.FullName
-        //     });
-        // }
-        // var directories = Directory.GetDirectories(path);
-        // foreach (var directory in directories)
-        // {
-        //     var directoryInfo = new DirectoryInfo(directory);
-        //     folder.Folders.Add(new Folder
-        //     {
-        //         Name = directoryInfo.Name,
-        //         Path = directoryInfo.FullName,
-        //         Folders = new List<Folder>(),
-        //         Files = new List<File>()
-        //     });
-        // }
         return folders;
     }
 
